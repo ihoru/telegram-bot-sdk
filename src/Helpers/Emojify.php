@@ -52,7 +52,6 @@ class Emojify
 
     /**
      * Returns the *Singleton* instance of this class.
-     *
      * @return Emojify The *Singleton* instance.
      */
     public static function getInstance()
@@ -139,6 +138,11 @@ class Emojify
      */
     protected function replace($line, $replace, $toWord = false, $delimiter = ':')
     {
+        uksort($replace, function ($a, $b) {
+            return strlen($b) - strlen($a);
+        });
+
+
         if ($toWord) {
             return $this->emojiToWordReplace($line, $replace, $delimiter);
         }
