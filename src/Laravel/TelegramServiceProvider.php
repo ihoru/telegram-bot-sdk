@@ -2,12 +2,12 @@
 
 namespace Telegram\Bot\Laravel;
 
+use Illuminate\Contracts\Container\Container as Application;
+use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Lumen\Application as LumenApplication;
 use Telegram\Bot\Api;
 use Telegram\Bot\BotsManager;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Container\Container as Application;
-use Laravel\Lumen\Application as LumenApplication;
-use Illuminate\Foundation\Application as LaravelApplication;
 
 /**
  * Class TelegramServiceProvider.
@@ -71,11 +71,14 @@ class TelegramServiceProvider extends ServiceProvider
      */
     protected function registerManager(Application $app)
     {
-        $app->singleton('telegram', function ($app) {
-            $config = (array)$app['config']['telegram'];
+        $app->singleton(
+            'telegram',
+            function ($app) {
+                $config = (array)$app['config']['telegram'];
 
-            return (new BotsManager($config))->setContainer($app);
-        });
+                return (new BotsManager($config))->setContainer($app);
+            }
+        );
 
         $app->alias('telegram', BotsManager::class);
     }
@@ -89,11 +92,14 @@ class TelegramServiceProvider extends ServiceProvider
      */
     protected function registerBindings(Application $app)
     {
-        $app->bind('telegram.bot', function ($app) {
-            $manager = $app['telegram'];
+        $app->bind(
+            'telegram.bot',
+            function ($app) {
+                $manager = $app['telegram'];
 
-            return $manager->bot();
-        });
+                return $manager->bot();
+            }
+        );
 
         $app->alias('telegram.bot', Api::class);
     }

@@ -3,24 +3,19 @@
 namespace Telegram\Bot;
 
 use Illuminate\Contracts\Container\Container;
-use Telegram\Bot\Commands\CommandBus;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\FileUpload\InputFile;
-use Telegram\Bot\HttpClients\GuzzleHttpClient;
 use Telegram\Bot\HttpClients\HttpClientInterface;
+use Telegram\Bot\Keyboard\Keyboard;
 use Telegram\Bot\Objects\File;
 use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\UnknownObject;
 use Telegram\Bot\Objects\Update;
 use Telegram\Bot\Objects\User;
 use Telegram\Bot\Objects\UserProfilePhotos;
-use Telegram\Bot\Keyboard\Keyboard;
-use Telegram\Bot\Helpers\Emojify;
 
 /**
  * Class Api.
- *
- * @mixin Commands\CommandBus
  */
 class Api
 {
@@ -53,16 +48,6 @@ class Api
      * @var bool Indicates if the request to Telegram will be asynchronous (non-blocking).
      */
     protected $isAsyncRequest = false;
-
-    /**
-     * @var CommandBus|null Telegram Command Bus.
-     */
-    protected $commandBus = null;
-
-    /**
-     * @var Container IoC Container
-     */
-    protected static $container = null;
 
     /**
      * Timeout of the request in seconds.
@@ -101,7 +86,6 @@ class Api
         }
 
         $this->client = new TelegramClient($httpClientHandler);
-        $this->commandBus = new CommandBus($this);
     }
 
     /**
@@ -191,16 +175,6 @@ class Api
     }
 
     /**
-     * Returns SDK's Command Bus.
-     *
-     * @return CommandBus
-     */
-    public function getCommandBus()
-    {
-        return $this->commandBus;
-    }
-
-    /**
      * A simple method for testing your bot's auth token.
      * Returns basic information about the bot in form of a User object.
      *
@@ -246,7 +220,6 @@ class Api
      */
     public function sendMessage(array $params)
     {
-        $params = $this->emojify($params, 'text');
         $response = $this->post('sendMessage', $params);
 
         return new Message($response->getDecodedBody());
@@ -778,8 +751,6 @@ class Api
      */
     public function answerCallbackQuery(array $params)
     {
-        $params = $this->emojify($params, 'text');
-
         return $this->post('answerCallbackQuery', $params);
     }
 
@@ -814,7 +785,6 @@ class Api
      */
     public function editMessageText(array $params)
     {
-        $params = $this->emojify($params, 'text');
         $response = $this->post('editMessageText', $params);
 
         return new Message($response->getDecodedBody());
@@ -1105,68 +1075,6 @@ class Api
     }
 
     /**
-     * Processes Inbound Commands.
-     *
-     * @param bool $webhook
-     *
-     * @return Update|Update[]
-     */
-    public function commandsHandler($webhook = false)
-    {
-        if ($webhook) {
-            $update = $this->getWebhookUpdates();
-            $this->processCommand($update);
-
-            return $update;
-        }
-
-        $updates = $this->getUpdates();
-        $highestId = -1;
-
-        foreach ($updates as $update) {
-            $highestId = $update->getUpdateId();
-            $this->processCommand($update);
-        }
-
-        //An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id.
-        if ($highestId != -1) {
-            $params = [];
-            $params['offset'] = $highestId + 1;
-            $params['limit'] = 1;
-            $this->getUpdates($params);
-        }
-
-        return $updates;
-    }
-
-    /**
-     * Check update object for a command and process.
-     *
-     * @param Update $update
-     */
-    public function processCommand(Update $update)
-    {
-        $message = $update->getMessage();
-
-        if ($message !== null && $message->has('text')) {
-            $this->getCommandBus()->handler($message->getText(), $update);
-        }
-    }
-
-    /**
-     * Helper to Trigger Commands.
-     *
-     * @param string $name Command Name
-     * @param Update $update Update Object
-     *
-     * @return mixed
-     */
-    public function triggerCommand($name, Update $update)
-    {
-        return $this->getCommandBus()->execute($name, $update->getMessage()->getText(), $update);
-    }
-
-    /**
      * Determine if a given type is the message.
      *
      * @param string         $type
@@ -1224,9 +1132,7 @@ class Api
             'pinned_message',
         ];
 
-        return $object->keys()
-            ->intersect($types)
-            ->pop();
+        return $object->keys()->intersect($types)->pop();
     }
 
     /**
@@ -1352,13 +1258,7 @@ class Api
         array $params = []
     ) {
         return new TelegramRequest(
-            $this->getAccessToken(),
-            $method,
-            $endpoint,
-            $params,
-            $this->isAsyncRequest(),
-            $this->getTimeOut(),
-            $this->getConnectTimeOut()
+            $this->getAccessToken(), $method, $endpoint, $params, $this->isAsyncRequest(), $this->getTimeOut(), $this->getConnectTimeOut()
         );
     }
 
@@ -1372,10 +1272,6 @@ class Api
      */
     public function __call($method, $arguments)
     {
-        if (preg_match('/^\w+Commands?/', $method, $matches)) {
-            return call_user_func_array([$this->getCommandBus(), $matches[0]], $arguments);
-        }
-
         $action = substr($method, 0, 3);
         if ($action === 'get') {
             /* @noinspection PhpUndefinedFunctionInspection */
@@ -1464,22 +1360,5 @@ class Api
         $this->connectTimeOut = $connectTimeOut;
 
         return $this;
-    }
-
-    /**
-     * Emojify Given Property in Params.
-     *
-     * @param array  $params
-     * @param string $property
-     *
-     * @return mixed
-     */
-    protected function emojify(array $params, $property)
-    {
-        if (isset($params[$property])) {
-            $params[$property] = Emojify::text($params[$property]);
-        }
-
-        return $params;
     }
 }

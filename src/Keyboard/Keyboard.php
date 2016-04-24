@@ -1,8 +1,6 @@
 <?php
 namespace Telegram\Bot\Keyboard;
 
-use Telegram\Bot\Helpers\Emojify;
-
 /**
  * Class Keyboard
  *
@@ -109,10 +107,6 @@ class Keyboard extends Base
      */
     public static function button($params = [])
     {
-        if (is_string($params)) {
-            return Emojify::text($params);
-        }
-
         return Button::make($params);
     }
 

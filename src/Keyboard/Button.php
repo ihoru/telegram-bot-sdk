@@ -1,8 +1,6 @@
 <?php
 namespace Telegram\Bot\Keyboard;
 
-use Telegram\Bot\Helpers\Emojify;
-
 /**
  * Class Button
  *
@@ -15,17 +13,4 @@ use Telegram\Bot\Helpers\Emojify;
  */
 class Button extends Base
 {
-    /**
-     * Button Label Text
-     *
-     * @param string $text
-     *
-     * @return $this
-     */
-    public function setText($text)
-    {
-        $this->items['text'] = Emojify::text($text);
-
-        return $this;
-    }
 }

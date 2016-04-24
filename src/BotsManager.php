@@ -197,83 +197,12 @@ class BotsManager
         $config = $this->getBotConfig($name);
 
         $token = array_get($config, 'token');
-        $commands = array_get($config, 'commands', []);
 
         $telegram = new Api(
-            $token,
-            $this->getConfig('async_requests', false),
-            $this->getConfig('http_client_handler', null)
+            $token, $this->getConfig('async_requests', false), $this->getConfig('http_client_handler', null)
         );
 
-        // Check if DI needs to be enabled for Commands
-        if ($this->getConfig('resolve_command_dependencies', false) && isset($this->container)) {
-            $telegram->setContainer($this->container);
-        }
-
-        $commands = $this->parseBotCommands($commands);
-
-        // Register Commands
-        $telegram->addCommands($commands);
-
         return $telegram;
-    }
-
-    /**
-     * Builds the list of commands for the given commands array.
-     *
-     * @param array $commands
-     *
-     * @return array An array of commands which includes global and bot specific commands.
-     */
-    protected function parseBotCommands(array $commands)
-    {
-        $globalCommands = $this->getConfig('commands', []);
-        $parsedCommands = $this->parseCommands($commands);
-
-        return $this->deduplicateArray(array_merge($globalCommands, $parsedCommands));
-    }
-
-    /**
-     * Parse an array of commands and build a list.
-     *
-     * @param array $commands
-     *
-     * @return array
-     */
-    protected function parseCommands(array $commands)
-    {
-        if (!is_array($commands)) {
-            return $commands;
-        }
-
-        $commandGroups = $this->getConfig('command_groups');
-        $sharedCommands = $this->getConfig('shared_commands');
-
-        $results = [];
-        foreach ($commands as $command) {
-            // If the command is a group, we'll parse through the group of commands
-            // and resolve the full class name.
-            if (isset($commandGroups[$command])) {
-                $results = array_merge(
-                    $results, $this->parseCommands($commandGroups[$command])
-                );
-
-                continue;
-
-            }
-
-            // If this command is actually a shared command, we'll extract the full
-            // class name out of the command list now.
-            if (isset($sharedCommands[$command])) {
-                $command = $sharedCommands[$command];
-            }
-
-            if (!in_array($command, $results)) {
-                $results[] = $command;
-            }
-        }
-
-        return $results;
     }
 
     /**

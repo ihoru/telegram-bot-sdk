@@ -2,18 +2,17 @@
 
 namespace Telegram\Bot\Tests;
 
-use Telegram\Bot\Api;
-use Prophecy\Argument;
 use InvalidArgumentException;
-use Telegram\Bot\Objects\File;
-use Telegram\Bot\Objects\User;
-use Telegram\Bot\TelegramClient;
-use Telegram\Bot\Objects\Update;
-use Telegram\Bot\Objects\Message;
-use Telegram\Bot\TelegramResponse;
-use Telegram\Bot\Tests\Mocks\Mocker;
+use Prophecy\Argument;
+use Telegram\Bot\Api;
 use Telegram\Bot\Commands\CommandBus;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
+use Telegram\Bot\Objects\File;
+use Telegram\Bot\Objects\Message;
+use Telegram\Bot\Objects\User;
+use Telegram\Bot\TelegramClient;
+use Telegram\Bot\TelegramResponse;
+use Telegram\Bot\Tests\Mocks\Mocker;
 
 class ApiTest extends \PHPUnit_Framework_TestCase
 {
@@ -69,56 +68,6 @@ class ApiTest extends \PHPUnit_Framework_TestCase
     public function it_checks_the_Client_object_is_returned()
     {
         $this->assertInstanceOf(TelegramClient::class, $this->api->getClient());
-    }
-
-    /** @test */
-    public function it_checks_the_commandBus_is_returned()
-    {
-        $this->assertInstanceOf(CommandBus::class, $this->api->getCommandBus());
-    }
-
-    /** @test */
-    public function it_checks_an_ioc_container_can_be_set()
-    {
-        $this->api->setContainer(Mocker::createContainer()->reveal());
-
-        $this->assertInstanceOf('\Illuminate\Contracts\Container\Container', $this->api->getContainer());
-    }
-
-    /** @test */
-    public function it_checks_an_update_object_is_returned_when_a_command_is_handled()
-    {
-        $this->api = Mocker::createMessageResponse('/start');
-        $updates = $this->api->commandsHandler();
-        $this->assertInstanceOf(Update::class, $updates[0]);
-    }
-
-    /** @test */
-    public function it_checks_the_correct_command_is_handled()
-    {
-        $this->api = Mocker::createMessageResponse('/mycommand');
-        $command = Mocker::createMockCommand('mycommand');
-        $command2 = Mocker::createMockCommand('mycommand2');
-
-        $this->api->addCommands([$command->reveal(), $command2->reveal()]);
-
-        $this->api->commandsHandler();
-
-        $command->make(Argument::any(), Argument::any(), Argument::any())->shouldHaveBeenCalled();
-        $command2->make(Argument::any(), Argument::any(), Argument::any())->shouldNotHaveBeenCalled();
-    }
-
-    /** @test */
-    public function it_checks_the_lastResponse_property_gets_populated_after_a_request()
-    {
-        $this->assertEmpty($this->api->getLastResponse());
-
-        $this->api = Mocker::createMessageResponse('/start');
-        $this->api->commandsHandler();
-
-        $lastResponse = $this->api->getLastResponse();
-        $this->assertNotEmpty($lastResponse);
-        $this->assertInstanceOf(TelegramResponse::class, $lastResponse);
     }
 
     /** @test */
@@ -236,11 +185,13 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         );
 
         /** @var Message $response */
-        $response = $this->api->forwardMessage([
-            'chat_id'      => $chatId,
-            'from_chat_id' => $fromId,
-            'message_id'   => $messageId,
-        ]);
+        $response = $this->api->forwardMessage(
+            [
+                'chat_id'      => $chatId,
+                'from_chat_id' => $fromId,
+                'message_id'   => $messageId,
+            ]
+        );
 
         $this->assertInstanceOf(Message::class, $response);
         $this->assertEquals($chatId, $response->getChat()->getId());

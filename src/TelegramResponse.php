@@ -72,7 +72,7 @@ class TelegramResponse
         }
 
         $this->request = $request;
-        $this->endPoint = (string) $request->getEndpoint();
+        $this->endPoint = (string)$request->getEndpoint();
     }
 
     /**

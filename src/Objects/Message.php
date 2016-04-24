@@ -2,8 +2,6 @@
 
 namespace Telegram\Bot\Objects;
 
-use Telegram\Bot\Helpers\Emojify;
-
 /**
  * Class Message.
  *
@@ -37,6 +35,7 @@ use Telegram\Bot\Helpers\Emojify;
  * @method int              getMigrateToChatId()        (Optional). The group has been migrated to a supergroup with the specified identifier, not exceeding 1e13 by absolute value.
  * @method int              getMigrateFromChatId()      (Optional). The supergroup has been migrated from a group with the specified identifier, not exceeding 1e13 by absolute value.
  * @method Message          getPinnedMessage()          (Optional). Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it is itself a reply.
+ * @method string           getText()                   (Optional). For text messages, the actual UTF-8 text of the message.
  */
 class Message extends BaseObject
 {
@@ -65,15 +64,5 @@ class Message extends BaseObject
             'new_chat_photo'   => PhotoSize::class,
             'pinned_message'   => Message::class,
         ];
-    }
-
-    /**
-     * (Optional). For text messages, the actual UTF-8 text of the message.
-     *
-     * @return string
-     */
-    public function getText()
-    {
-        return Emojify::translate($this->get('text'));
     }
 }

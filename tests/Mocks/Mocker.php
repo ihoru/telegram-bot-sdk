@@ -2,50 +2,28 @@
 
 namespace Telegram\Bot\Tests\Mocks;
 
-use Telegram\Bot\Api;
-use Prophecy\Prophet;
-use Prophecy\Argument;
 use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Telegram\Bot\Objects\Update;
-use GuzzleHttp\Handler\MockHandler;
+use Prophecy\Argument;
+use Prophecy\Prophet;
+use Telegram\Bot\Api;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
+use Telegram\Bot\Objects\Update;
 
 class Mocker
 {
     /**
      * Create a mocked API object with a container.
      *
-     * @param bool $withContainer Should the mocked object have a mocked
-     *                            container added to it?
-     *
      * @return \Prophecy\Prophecy\ObjectProphecy
      */
-    public static function createApi($withContainer = false)
+    public static function createApi()
     {
-        if ($withContainer) {
-            $container = Mocker::createContainer();
-            $container->make(Argument::any())->willReturn(new \stdClass());
-        } else {
-            $container = null;
-        }
-
         $api = (new Prophet())->prophesize(Api::class);
-        $api->hasContainer()->willReturn($withContainer);
-        $api->getContainer()->willReturn($container);
 
         return $api;
-    }
-
-    /**
-     * Create an IOC container that can be added to the API
-     *
-     * @return \Prophecy\Prophecy\ObjectProphecy
-     */
-    public static function createContainer()
-    {
-        return (new Prophet())->prophesize(\Illuminate\Contracts\Container\Container::class);
     }
 
     /**
@@ -56,23 +34,6 @@ class Mocker
     public static function createUpdateObject()
     {
         return (new Prophet())->prophesize(Update::class);
-    }
-
-    /**
-     * Creates a stub command that responds to getName() and make() method calls.
-     *
-     * @param string $name
-     *
-     * @return \Prophecy\Prophecy\ObjectProphecy
-     */
-    public static function createMockCommand($name = 'start')
-    {
-        $command = (new Prophet())->prophesize(MockCommand::class);
-        $command->getAliases()->willReturn(null);
-        $command->getName()->willReturn($name);
-        $command->make(Argument::any(), Argument::any(), Argument::any())->willReturn(null);
-
-        return $command;
     }
 
     /**
@@ -163,11 +124,13 @@ class Mocker
     private static function setTelegramResponse($body)
     {
         $body = json_encode($body);
-        $mock = new MockHandler([
-            new Response(200, [], $body),
-            new Response(200, [], $body),
-            // two times because Api::commandsHandler makes two requests (when not using webhook method).
-        ]);
+        $mock = new MockHandler(
+            [
+                new Response(200, [], $body),
+                new Response(200, [], $body),
+                // two times because Api::commandsHandler makes two requests (when not using webhook method).
+            ]
+        );
         $handler = HandlerStack::create($mock);
         $client = new GuzzleHttpClient(new Client(['handler' => $handler]));
 
