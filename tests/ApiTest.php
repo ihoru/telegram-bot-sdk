@@ -5,7 +5,6 @@ namespace Telegram\Bot\Tests;
 use InvalidArgumentException;
 use Prophecy\Argument;
 use Telegram\Bot\Api;
-use Telegram\Bot\Commands\CommandBus;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
 use Telegram\Bot\Objects\File;
 use Telegram\Bot\Objects\Message;
@@ -153,8 +152,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->api->setTimeOut(1);
         $this->api->setConnectTimeOut(1);
 
-        /** @var Message $response */
-        $response = $this->api->sendMessage(['chat_id' => $chatId, 'text' => $text]);
+        $this->api->sendMessage(['chat_id' => $chatId, 'text' => $text]);
 
         /** @var GuzzleHttpClient $clientHandler */
         $clientHandler = $this->api->getClient()->getHttpClientHandler();

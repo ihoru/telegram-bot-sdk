@@ -2,11 +2,13 @@
 
 namespace Telegram\Bot;
 
-use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Collection;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\HttpClients\HttpClientInterface;
 use Telegram\Bot\Keyboard\Keyboard;
+use Telegram\Bot\Objects\Chat;
+use Telegram\Bot\Objects\ChatMember;
 use Telegram\Bot\Objects\File;
 use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\UnknownObject;
@@ -22,7 +24,7 @@ class Api
     /**
      * @var string Version number of the Telegram Bot PHP SDK.
      */
-    const VERSION = '3.0.0';
+    const VERSION = '3.2.1';
 
     /**
      * @var string The name of the environment variable that contains the Telegram Bot API Access Token.
@@ -187,6 +189,95 @@ class Api
         $response = $this->post('getMe');
 
         return new User($response->getDecodedBody());
+    }
+
+    /**
+     * Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.).
+     *
+     * <code>
+     * $params = [
+     *   'chat_id' => '',
+     * ];
+     * </code>
+     *
+     * @link https://core.telegram.org/bots/api#getchat
+     *
+     * @param array $params
+     *
+     * @return Chat
+     */
+    public function getChat(array $params)
+    {
+        $response = $this->post('getChat', $params);
+
+        return new Chat($response->getDecodedBody());
+    }
+
+    /**
+     * Use this method to get a list of administrators in a chat. On success, returns an Array of ChatMember objects that contains information about all chat administrators except other bots. If the chat is a group or a supergroup and no administrators were appointed, only the creator will be returned.
+     *
+     * <code>
+     * $params = [
+     *   'chat_id' => '',
+     * ];
+     * </code>
+     *
+     * @link https://core.telegram.org/bots/api#getchatadministrators
+     *
+     * @param array $params
+     *
+     * @return Collection
+     */
+    public function getChatAdministrators(array $params)
+    {
+        $response = $this->post('getChatAdministrators', $params);
+
+        return new Collection(array_get($response->getDecodedBody(), 'result', []));
+    }
+
+    /**
+     * Use this method to get the number of members in a chat. Returns Int on success.
+     *
+     * <code>
+     * $params = [
+     *   'chat_id' => '',
+     * ];
+     * </code>
+     *
+     * @link https://core.telegram.org/bots/api#getchatmemberscount
+     *
+     * @param array $params
+     *
+     * @return int
+     */
+    public function getChatMembersCount(array $params)
+    {
+        $response = $this->post('getChatMembersCount', $params);
+
+        return array_get($response->getDecodedBody(), 'result', 0);
+    }
+
+    /**
+     * Use this method to get information about a member of a chat. Returns a ChatMember object on success.
+     *
+     * <code>
+     * $params = [
+     *   'chat_id' => '',
+     *   'user_id' => '',
+     * ];
+     * </code>
+     *
+     * @link https://core.telegram.org/bots/api#getchatmember
+     *
+     * @param array $params
+     *
+     * @return ChatMember
+     */
+    public function getChatMember(array $params)
+    {
+        $response = $this->post('getChatMember', $params);
+
+        return new ChatMember($response->getDecodedBody());
     }
 
     /**
@@ -1288,38 +1379,6 @@ class Api
         $response = $this->post($method, $arguments[0]);
 
         return new UnknownObject($response->getDecodedBody());
-    }
-
-    /**
-     * Set the IoC Container.
-     *
-     * @param $container Container instance
-     *
-     * @return void
-     */
-    public static function setContainer(Container $container)
-    {
-        self::$container = $container;
-    }
-
-    /**
-     * Get the IoC Container.
-     *
-     * @return Container
-     */
-    public function getContainer()
-    {
-        return self::$container;
-    }
-
-    /**
-     * Check if IoC Container has been set.
-     *
-     * @return boolean
-     */
-    public function hasContainer()
-    {
-        return self::$container !== null;
     }
 
     /**

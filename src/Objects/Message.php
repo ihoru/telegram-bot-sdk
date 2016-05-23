@@ -9,6 +9,7 @@ namespace Telegram\Bot\Objects;
  * @method int              getMessageId()              Unique message identifier.
  * @method User             getFrom()                   (Optional). Sender, can be empty for messages sent to channels.
  * @method int              getDate()                   Date the message was sent in Unix time.
+ * @method int              getEditDate()               (Optional). Date the message was last edited in Unix time.
  * @method Chat             getChat()                   Conversation the message belongs to.
  * @method User             getForwardFrom()            (Optional). For forwarded messages, sender of the original message.
  * @method int              getForwardDate()            (Optional). For forwarded messages, date the original message was sent in Unix time.
