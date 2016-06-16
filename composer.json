@@ -1,5 +1,5 @@
 {
-  "name": "ihoru/telegram-bot-sdk",
+  "name": "irazasyed/telegram-bot-sdk",
   "description": "The Unofficial Telegram Bot API PHP SDK",
   "keywords": [
     "telegram",
@@ -52,6 +52,7 @@
   },
   "extra": {
     "branch-alias": {
+      "dev-pure": "pure",
       "dev-master": "3.0-dev"
     }
   },
