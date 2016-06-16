@@ -1,5 +1,5 @@
 {
-  "name": "irazasyed/telegram-bot-sdk",
+  "name": "ihoru/telegram-bot-sdk",
   "description": "The Unofficial Telegram Bot API PHP SDK",
   "keywords": [
     "telegram",
@@ -18,6 +18,11 @@
       "name": "Syed Irfaq R.",
       "email": "syed+gh@lukonet.com",
       "homepage": "https://github.com/irazasyed"
+    },
+    {
+      "name": "Ihor Polyakov",
+      "email": "ihor.polyakov@gmail.com",
+      "homepage": "https://github.com/ihoru"
     }
   ],
   "require": {
