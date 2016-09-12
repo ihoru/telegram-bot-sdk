@@ -147,6 +147,16 @@ class TelegramResponse
     }
 
     /**
+     * Helper function to return the payload of a successful response.
+     *
+     * @return mixed
+     */
+    public function getResult()
+    {
+        return $this->decodedBody['result'];
+    }
+
+    /**
      * Checks if response is an error.
      *
      * @return bool
